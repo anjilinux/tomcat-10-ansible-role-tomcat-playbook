@@ -1,0 +1,4 @@
+---
+- name: unstall the tomcat 
+  apt: name=tomcat state=absent
+  

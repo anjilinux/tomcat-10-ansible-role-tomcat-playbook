@@ -1,0 +1,52 @@
+---
+- name: install tomcat 
+  include_tasks: install.yml
+
+
+
+- name: create a group tomcat
+  group: 
+    name: tomcat
+
+
+- name: create a user tomcat 
+  user: 
+    name: tomcat
+    group: tomcat
+    system: yes
+    state: present
+
+- name: change owner & group of tomcat directories 
+  file: 
+    path: "{{ home_path }}"
+    owner: tomcat
+    group: tomcat
+    recurse: yes 
+
+- name: copy templete file tomcat service file 
+  template: 
+     src: templates/tomcat.service.j2
+     dest: /etc/systemd/system/tomcat.service
+  when: ansible_service_mgr == "systemd"
+
+- name: start the tomcat service 
+  include_tasks: service.yml
+
+- name: set UI access credentials 
+  template: 
+    src: tomcat-users.xml.j2
+    dest: /opt/tomcat/conf/tomcat-users.xml
+  notify: restart tomcat 
+
+- name: allow access to manager and host manager apps from any IP
+  template: 
+    src: context.xml.j2
+    dest: "{{ item }}"
+  loop:
+    - /opt/tomcat/webapps/host-manager/META-INF/context.xml
+    - /opt/tomcat/webapps/manager/META-INF/context.xml
+  notify: restart tomcat
+
+
+
+

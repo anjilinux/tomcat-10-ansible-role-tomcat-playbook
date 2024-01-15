@@ -1,0 +1,10 @@
+---
+- name: restart the service 
+  service: 
+    name: tomcat
+    state: started
+    enabled: yes
+
+
+
+
